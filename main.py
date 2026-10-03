@@ -8,17 +8,14 @@ CHANNEL_ACCESS_TOKEN = "pB3zIvFAwtNJSEWT/26TmHxMmhqO9ozTKtFpOWSKjPvGVWpIeAy738kg
 CLOUD_FUNCTIONS_URL = "https://predict-594289522854.asia-northeast1.run.app"
 
 
-# ---------------------------------------------------------
-# Cloud Functions の予測結果を取得
-# ---------------------------------------------------------
-def get_prediction():
-    res = requests.get(CLOUD_FUNCTIONS_URL)
+# Cloud Functions に銘柄を渡して予測を取得
+def get_prediction(ticker):
+    url = f"{CLOUD_FUNCTIONS_URL}?ticker={ticker}"
+    res = requests.get(url)
     return res.json()
 
 
-# ---------------------------------------------------------
 # LINE返信
-# ---------------------------------------------------------
 def reply_message(reply_token, text):
     url = "https://api.line.me/v2/bot/message/reply"
     headers = {
@@ -32,11 +29,10 @@ def reply_message(reply_token, text):
     requests.post(url, headers=headers, data=json.dumps(body))
 
 
-# ---------------------------------------------------------
-# 整形ロジック（ここが今回の本番）
-# ---------------------------------------------------------
+# 整形ロジック
 def format_prediction(pred):
-    lines = ["📈 トヨタ自動車（7203）最新予測\n"]
+    ticker = pred[0].get("Ticker", "不明")
+    lines = [f"📈 {ticker} 最新予測\n"]
 
     for row in pred:
         h = row["Horizon"]
@@ -56,9 +52,7 @@ def format_prediction(pred):
     return "\n".join(lines)
 
 
-# ---------------------------------------------------------
 # Webhook
-# ---------------------------------------------------------
 @app.route("/webhook", methods=["POST"])
 def webhook():
     body = request.get_json()
@@ -68,8 +62,9 @@ def webhook():
         for event in body["events"]:
             if event["type"] == "message":
                 reply_token = event["replyToken"]
+                user_text = event["message"]["text"]  # ← ユーザーが送った銘柄
 
-                pred = get_prediction()
+                pred = get_prediction(user_text)
                 text = format_prediction(pred)
 
                 reply_message(reply_token, text)
