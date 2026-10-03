@@ -4,7 +4,7 @@ import json
 
 app = Flask(__name__)
 
-CHANNEL_ACCESS_TOKEN = "YOUR_ACCESS_TOKEN"
+CHANNEL_ACCESS_TOKEN = "pB3zIvFAwtNJSEWT/26TmHxMmhqO9ozTKtFpOWSKjPvGVWpIeAy738kg8gflivjQxEGY00lKuGSdoG2TilxFgG/lCMv8yZXf65sHalLTZ0x8T6qNfoiNXXfDM1QLpLFBvR2c8z0MZDOV/G/llEkXEwdB04t89/1O/w1cDnyilFU="
 
 def reply_message(reply_token, text):
     url = "https://api.line.me/v2/bot/message/reply"
