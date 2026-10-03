@@ -6,6 +6,12 @@ app = Flask(__name__)
 
 CHANNEL_ACCESS_TOKEN = "pB3zIvFAwtNJSEWT/26TmHxMmhqO9ozTKtFpOWSKjPvGVWpIeAy738kg8gflivjQxEGY00lKuGSdoG2TilxFgG/lCMv8yZXf65sHalLTZ0x8T6qNfoiNXXfDM1QLpLFBvR2c8z0MZDOV/G/llEkXEwdB04t89/1O/w1cDnyilFU="
 
+CLOUD_FUNCTIONS_URL = "https://predict-594289522854.asia-northeast1.run.app"
+
+def get_prediction():
+    res = requests.get(CLOUD_FUNCTIONS_URL)
+    return res.json()
+
 def reply_message(reply_token, text):
     url = "https://api.line.me/v2/bot/message/reply"
     headers = {
@@ -27,12 +33,9 @@ def webhook():
         for event in body["events"]:
             if event["type"] == "message":
                 reply_token = event["replyToken"]
-                user_text = event["message"]["text"]
 
-                if "高速" in user_text:
-                    reply_message(reply_token, "高速モードで処理します")
-                else:
-                    reply_message(reply_token, "高精度モードで処理します")
+                prediction = get_prediction()
+                reply_message(reply_token, f"予測結果: {prediction}")
 
     return "OK"
 
